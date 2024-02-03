@@ -55,22 +55,13 @@ class _ScanQrViewState extends State<ScanQrView> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            (status?.isGranted ?? false)
-                ? SizedBox(
-                    height: 400,
-                    width: 400,
-                    child: QRView(key: key, onQRViewCreated: qr),
-                  )
-                : const ColoredBox(color: Colors.red),
-            Center(
-                child: (barcode != null)
-                    ? Text('${barcode!.code}')
-                    : const Text("Scan Barcode Code")),
-          ],
-        ),
+        child: (status?.isGranted ?? false)
+            ? SizedBox(
+                height: 400,
+                width: 400,
+                child: QRView(key: key, onQRViewCreated: qr),
+              )
+            : const ColoredBox(color: Colors.red),
       ),
     );
   }
