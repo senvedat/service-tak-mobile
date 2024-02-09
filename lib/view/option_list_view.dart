@@ -19,7 +19,7 @@ class _OptionListViewState extends State<OptionListView> {
           children: [
             ElevatedButton(
               style: ElevatedButton.styleFrom(
-                primary: Colors.blueGrey,
+                backgroundColor: Colors.blueGrey,
                 elevation: 0,
               ),
               onPressed: () {
@@ -34,7 +34,7 @@ class _OptionListViewState extends State<OptionListView> {
             ),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
-                primary: Colors.blueGrey,
+                backgroundColor: Colors.blueGrey,
                 elevation: 0,
               ),
               onPressed: () {
