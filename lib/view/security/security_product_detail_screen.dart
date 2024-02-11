@@ -6,8 +6,8 @@ import 'package:service_tak_mobile/utils/helper_methods.dart';
 import 'package:service_tak_mobile/view/widget/default_app_bar.dart';
 import 'package:service_tak_mobile/viewmodel/security/product_detail_viewmodel.dart';
 
-class ProductDetailScreen extends StatelessWidget {
-  const ProductDetailScreen({super.key});
+class SecurityProductDetailScreen extends StatelessWidget {
+  const SecurityProductDetailScreen({super.key});
 
   @override
   Widget build(BuildContext context) {

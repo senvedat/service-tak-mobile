@@ -4,7 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:service_tak_mobile/utils/constants.dart';
 import 'package:service_tak_mobile/utils/helper_methods.dart';
 import 'package:service_tak_mobile/utils/navigation_helper.dart';
-import 'package:service_tak_mobile/view/security/product_detail_screen.dart';
+import 'package:service_tak_mobile/view/security/security_product_detail_screen.dart';
 import 'package:service_tak_mobile/view/widget/default_app_bar.dart';
 import 'package:service_tak_mobile/viewmodel/security/open_viewmodel.dart';
 
@@ -126,7 +126,7 @@ class OpenScreen extends StatelessWidget {
   Widget _bodyItem(BuildContext context, int index) {
     return InkWell(
       onTap: () {
-        navigatorPush(context, const ProductDetailScreen());
+        navigatorPush(context, const SecurityProductDetailScreen());
       },
       child: Padding(
         padding: EdgeInsets.only(bottom: getDynamicHeight(context, 0.02)),
