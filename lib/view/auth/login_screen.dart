@@ -42,7 +42,7 @@ class LoginScreen extends StatelessWidget {
     );
   }
 
-  Padding _body(BuildContext context, LoginViewModel viewModel) {
+  Widget _body(BuildContext context, LoginViewModel viewModel) {
     return Padding(
       padding: EdgeInsets.symmetric(
         horizontal: getDynamicWidth(context, 0.06),
@@ -62,26 +62,26 @@ class LoginScreen extends StatelessWidget {
               style: Theme.of(context).textTheme.displaySmall,
             ),
             emptySpaceHeight(context, 0.04),
-            InputField(
-              controller: viewModel.emailController,
-              isPassword: false,
-            ),
+            inputField(context, false, viewModel),
             emptySpaceHeight(context, 0.03),
-            InputField(
-              controller: viewModel.passwordController,
-              isPassword: true,
-            ),
+            inputField(context, true, viewModel),
             emptySpaceHeight(context, 0.01),
             _rememberMe(context, viewModel),
             emptySpaceHeight(context, 0.03),
-            _loginButton(context),
+            viewModel.hasError
+                ? _errorMessage(context, viewModel)
+                : const SizedBox.shrink(),
+            viewModel.hasError
+                ? emptySpaceHeight(context, 0.03)
+                : const SizedBox.shrink(),
+            _loginButton(context, viewModel)
           ],
         ),
       ),
     );
   }
 
-  Row _rememberMe(BuildContext context, LoginViewModel viewModel) {
+  Widget _rememberMe(BuildContext context, LoginViewModel viewModel) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -110,32 +110,36 @@ class LoginScreen extends StatelessWidget {
             ),
           ],
         ),
-        Text(
-          "Forgot Password?",
-          style: Theme.of(context).textTheme.displaySmall!.copyWith(
-                color: kBlack,
-              ),
-        ),
+        // Text(
+        //   "Forgot Password?",
+        //   style: Theme.of(context).textTheme.displaySmall!.copyWith(
+        //         color: kBlack,
+        //       ),
+        // ),
       ],
     );
   }
 
-  ElevatedButton _loginButton(BuildContext context) {
+  Widget _loginButton(BuildContext context, LoginViewModel viewModel) {
     return ElevatedButton(
-      style: ElevatedButton.styleFrom(
-        backgroundColor: kMediumGreen,
-        minimumSize:
-            Size(getDynamicWidth(context, 1), getDynamicHeight(context, 0.075)),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(18),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: kMediumGreen,
+          minimumSize: Size(
+              getDynamicWidth(context, 1), getDynamicHeight(context, 0.075)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(18),
+          ),
         ),
-      ),
-      onPressed: () {},
-      child: Text(
-        "Log In",
-        style: Theme.of(context).textTheme.labelLarge,
-      ),
-    );
+        onPressed: () {
+          viewModel.userLogin(context);
+          viewModel.setIsLoading = true;
+        },
+        child: !viewModel.isLoading
+            ? Text(
+                "Log In",
+                style: Theme.of(context).textTheme.labelLarge,
+              )
+            : const Center(child: CircularProgressIndicator(color: kWhite,)));
   }
 
   Text _logo(BuildContext context) {
@@ -149,46 +153,66 @@ class LoginScreen extends StatelessWidget {
   }
 }
 
-class InputField extends StatelessWidget {
-  const InputField({
-    super.key,
-    required this.controller,
-    required this.isPassword,
-  });
+Widget _errorMessage(BuildContext context, LoginViewModel viewModel) {
+  return Column(
+    crossAxisAlignment: CrossAxisAlignment.center,
+    mainAxisAlignment: MainAxisAlignment.center,
+    children: [
+      Text(
+        viewModel.errorMessage,
+        style: const TextStyle(color: kErrorRed, fontWeight: FontWeight.bold),
+      ),
+    ],
+  );
+}
 
-  final TextEditingController controller;
-  final bool isPassword;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          isPassword ? "Password" : "Email",
-          style: Theme.of(context).textTheme.displaySmall!.copyWith(
-                fontWeight: FontWeight.w700,
-              ),
+Widget inputField(
+    BuildContext context, bool isPassword, LoginViewModel viewModel) {
+  return Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Text(
+        isPassword ? "Password" : "Email",
+        style: Theme.of(context).textTheme.displaySmall!.copyWith(
+              fontWeight: FontWeight.w700,
+            ),
+      ),
+      TextFormField(
+        controller: isPassword
+            ? viewModel.passwordController
+            : viewModel.emailController,
+        cursorColor: kMediumGreen,
+        obscureText: isPassword ? viewModel.isPasswordObscure : false,
+        style: GoogleFonts.montserrat(
+          color: kBlack,
+          fontSize: getDynamicHeight(context, 0.018),
+          fontWeight: FontWeight.w500,
         ),
-        TextFormField(
-          controller: controller,
-          cursorColor: kMediumGreen,
-          obscureText: isPassword,
-          style: GoogleFonts.montserrat(
-            color: kBlack,
-            fontSize: getDynamicHeight(context, 0.018),
-            fontWeight: FontWeight.w500,
-          ),
-          decoration: const InputDecoration(
-            enabledBorder: UnderlineInputBorder(
+        decoration: InputDecoration(
+            enabledBorder: const UnderlineInputBorder(
               borderSide: BorderSide(color: kTextFieldUnderline),
             ),
-            focusedBorder: UnderlineInputBorder(
+            focusedBorder: const UnderlineInputBorder(
               borderSide: BorderSide(color: kMediumGreen),
             ),
-          ),
-        ),
-      ],
-    );
-  }
+            suffixIcon: isPassword
+                ? IconButton(
+                    icon: Icon(
+                      viewModel.isPasswordObscure
+                          ? Icons.visibility
+                          : Icons.visibility_off,
+                      color: kTextGrey,
+                    ),
+                    onPressed: () {
+                      viewModel.setPasswordObscure =
+                          !viewModel.isPasswordObscure;
+                    },
+                  )
+                : SizedBox.shrink()),
+        onChanged: (value) {
+          viewModel.setHasError = false;
+        },
+      ),
+    ],
+  );
 }
