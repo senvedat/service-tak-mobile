@@ -3,9 +3,18 @@
 <plist version="1.0">
 <dict>
 	<key>io.flutter.embedded_views_preview</key>
+	<key>NSAppTransportSecurity</key>
+<dict>
+    <key>NSAllowsArbitraryLoads</key>
+    <true/>
+</dict>
 	<true/>
-	<key>NSCameraUsageDescription</key>
-	<string>This app needs camera access to scan QR codes</string>
+		<key>NSCameraUsageDescription</key>
+	<string>We need this permission to upload your photo and scan QR codes. Please accept permission to upload and change photos and QRs.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>We need this permission to upload your photo. Please accept permission to upload and change photos.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>We need this permission to upload your photo. Please accept permission to upload and change photos.</string>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
