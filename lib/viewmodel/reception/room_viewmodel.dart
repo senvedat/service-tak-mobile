@@ -51,6 +51,7 @@ class RoomViewModel extends ChangeNotifier {
   bool _isPageLoaded = false;
   bool _isButtonLoading = false;
   final List<GeneratedQr> _qrList = [];
+  List<Guest> _guestList = [];
   ErrorResponse? _errorResponse;
 
   // Getters
@@ -72,6 +73,7 @@ class RoomViewModel extends ChangeNotifier {
   bool get isPageLoaded => _isPageLoaded;
   bool get isButtonLoading => _isButtonLoading;
   List<GeneratedQr> get qrList => _qrList;
+  List<Guest> get guestList => _guestList;
   ErrorResponse? get errorResponse => _errorResponse;
 
   // Methods
@@ -126,6 +128,11 @@ class RoomViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  set setGuestList(List<Guest> value) {
+    _guestList = value;
+    notifyListeners();
+  }
+
   set setErrorResponse(ErrorResponse value) {
     _errorResponse = value;
     notifyListeners();
@@ -154,6 +161,7 @@ class RoomViewModel extends ChangeNotifier {
       Room room = Room.fromJson(jsonDecode(response.body)['room']);
       setRoom = room;
       await generateQr();
+      setGuestList = room.guests;
       setIsPageLoaded = true;
     } else {
       setErrorResponse = ErrorResponse.fromJson(jsonDecode(response.body));
@@ -210,7 +218,10 @@ class RoomViewModel extends ChangeNotifier {
             guest: newGuest,
             imageUrl: _qrList.isNotEmpty ? _room!.guests.first.passport : null,
           ));
+      print("rselt: $result");
       if (result == "refresh") {
+        print("girdi");
+        setIsPageLoaded = false;
         await getRoom();
       }
     } else {
