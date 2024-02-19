@@ -148,9 +148,9 @@ class RoomScreen extends StatelessWidget {
         physics: const BouncingScrollPhysics(),
         padding: EdgeInsets.zero,
         shrinkWrap: true,
-        itemCount: viewModel.room!.guests.length,
+        itemCount: viewModel.guestList.length,
         itemBuilder: (context, index) {
-          Guest guest = viewModel.room!.guests[index];
+          Guest guest = viewModel.guestList[index];
           return _guestCard(context, viewModel, index, guest);
         },
       ),
@@ -337,10 +337,9 @@ class RoomScreen extends StatelessWidget {
   ElevatedButton _button(BuildContext context, RoomViewModel viewModel) {
     return ElevatedButton(
       style: ElevatedButton.styleFrom(
-        backgroundColor:
-            viewModel.isButtonActive() || !viewModel.isButtonLoading
-                ? kMediumGreen
-                : kMediumGreen.withOpacity(0.4),
+        backgroundColor: viewModel.isButtonActive()
+            ? kMediumGreen
+            : kMediumGreen.withOpacity(0.4),
         minimumSize:
             Size(getDynamicWidth(context, 1), getDynamicHeight(context, 0.075)),
         shape: RoundedRectangleBorder(
