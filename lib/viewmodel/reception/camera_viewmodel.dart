@@ -39,8 +39,7 @@ class CameraViewModel extends ChangeNotifier with WidgetsBindingObserver {
   bool _isImageInProgress = false;
   bool? _isEdit;
   bool _isButtonLoading = false;
-    ErrorResponse? _errorResponse;
-
+  ErrorResponse? _errorResponse;
 
   // Getters
   PermissionStatus? get status => _status;
@@ -113,10 +112,10 @@ class CameraViewModel extends ChangeNotifier with WidgetsBindingObserver {
       // bool result2 = await _deleteGuest();
 
       if (result1) {
-        navigatorPop(_myWidgetKey.currentContext!, "");
+        navigatorPop(_myWidgetKey.currentContext!, "refresh");
       }
     } else {
-      navigatorPop(_myWidgetKey.currentContext!, "");
+      navigatorPop(_myWidgetKey.currentContext!, "refresh");
     }
   }
 
@@ -156,7 +155,6 @@ class CameraViewModel extends ChangeNotifier with WidgetsBindingObserver {
         await _guestService.updatePassport(authToken, _guest!.id!, _image!);
 
     if (response.statusCode == 200) {
-
       if (_isEdit!) {
         await LocalStorageService.instance
             .deleteItem(LocalStorageKeys.localImage);
