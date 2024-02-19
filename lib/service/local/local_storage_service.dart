@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:service_tak_mobile/utils/local_storage_keys.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -54,12 +55,11 @@ class LocalStorageService {
     try {
       for (var key in LocalStorageKeys.values) {
         LocalStorageService.instance.deleteItem(key);
-        print("delete from localstorage -> ${key}");
       }
       true;
     } catch (e) {
-      print("allItemClear Error!");
-      print(e);
+      debugPrint("allItemClear Error!");
+      debugPrint(e.toString());
       false;
     }
   }
