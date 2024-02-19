@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
-import 'package:flutter/widgets.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 
@@ -17,23 +15,27 @@ class LoginScreen extends StatelessWidget {
       create: (_) => LoginViewModel(),
       child: Consumer<LoginViewModel>(
         builder: (context, viewModel, _) {
-          return Scaffold(
-            backgroundColor: kTransparent,
-            body: Container(
-              alignment: Alignment.center,
-              decoration: const BoxDecoration(
-                image: DecorationImage(
-                  image: AssetImage("assets/images/login_bg.jpg"),
-                  fit: BoxFit.cover,
+          return PopScope(
+            canPop: false,
+            child: Scaffold(
+              resizeToAvoidBottomInset: false,
+              backgroundColor: kTransparent,
+              body: Container(
+                alignment: Alignment.center,
+                decoration: const BoxDecoration(
+                  image: DecorationImage(
+                    image: AssetImage("assets/images/login_bg.jpg"),
+                    fit: BoxFit.cover,
+                  ),
                 ),
-              ),
-              child: Column(
-                children: [
-                  emptySpaceHeight(context, 0.1),
-                  _logo(context),
-                  emptySpaceHeight(context, 0.1),
-                  _body(context, viewModel),
-                ],
+                child: Column(
+                  children: [
+                    emptySpaceHeight(context, 0.1),
+                    _logo(context),
+                    emptySpaceHeight(context, 0.1),
+                    _body(context, viewModel),
+                  ],
+                ),
               ),
             ),
           );
@@ -139,7 +141,10 @@ class LoginScreen extends StatelessWidget {
                 "Log In",
                 style: Theme.of(context).textTheme.labelLarge,
               )
-            : const Center(child: CircularProgressIndicator(color: kWhite,)));
+            : const Center(
+                child: CircularProgressIndicator(
+                color: kWhite,
+              )));
   }
 
   Text _logo(BuildContext context) {
@@ -182,6 +187,9 @@ Widget inputField(
             ? viewModel.passwordController
             : viewModel.emailController,
         cursorColor: kMediumGreen,
+        keyboardType: isPassword
+            ? TextInputType.visiblePassword
+            : TextInputType.emailAddress,
         obscureText: isPassword ? viewModel.isPasswordObscure : false,
         style: GoogleFonts.montserrat(
           color: kBlack,
@@ -208,7 +216,7 @@ Widget inputField(
                           !viewModel.isPasswordObscure;
                     },
                   )
-                : SizedBox.shrink()),
+                : const SizedBox.shrink()),
         onChanged: (value) {
           viewModel.setHasError = false;
         },
