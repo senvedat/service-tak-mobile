@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:service_tak_mobile/locator.dart';
+import 'package:service_tak_mobile/service/local/local_storage_service.dart';
 import 'package:service_tak_mobile/utils/theme.dart';
 import 'package:service_tak_mobile/view/splash/splash_screen.dart';
-import 'package:service_tak_mobile/view/security/open_screen.dart';
-import 'package:service_tak_mobile/view/spa/spa_product_detail_screen.dart';
 
-void main() {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  initLocator();
+  await LocalStorageService().onInitialize();
   runApp(const MyApp());
 }
 
