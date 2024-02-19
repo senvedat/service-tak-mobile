@@ -63,11 +63,8 @@ class HotelGuestService {
 
   Future updatePassport(String authToken, num id, File imageUrl) async {
     Dio dio = Dio();
-    print("guest id: $id");
-    print(imageUrl.length);
-    print(imageUrl);
+    debugPrint("guest id: $id");
     try {
-      final apiUrl = Uri.parse('$kBaseUrl/api/hotel/guest/update/passport');
 
       final response = await dio.post(
         '$kBaseUrl/api/hotel/guest/update/passport',
@@ -92,7 +89,7 @@ class HotelGuestService {
       //   },
       //   body: jsonEncode(<String, dynamic>{"id": id, "image": }),
       // );
-      print("jsonDecode response: ${response.data}");
+      debugPrint("jsonDecode response: ${response.data}");
       if (response.statusCode == 200 && response.data.isNotEmpty) {
         return response;
       } else {
@@ -130,7 +127,7 @@ class HotelGuestService {
   }
 
   Future deleteGuest(String authToken, String id) async {
-    print("id: $id");
+    debugPrint("id: $id");
     try {
       final apiUrl = Uri.parse('$kBaseUrl/api/hotel/guest/$id');
 
@@ -141,7 +138,7 @@ class HotelGuestService {
           "Authorization": 'Bearer $authToken'
         },
       );
-      print("rseponse: ${response.body}");
+      debugPrint("rseponse: ${response.body}");
       if (response.statusCode == 200 && response.body.isNotEmpty) {
         return response;
       } else {
