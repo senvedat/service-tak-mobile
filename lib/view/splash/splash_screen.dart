@@ -12,13 +12,16 @@ class SplashScreen extends StatelessWidget {
       create: (_) => SplashViewModel(context),
       child: Consumer<SplashViewModel>(
         builder: (context, viewModel, _) {
-          return Scaffold(
-            backgroundColor: kMediumGreen,
-            body: Center(
-              child: Text(
-                textAlign: TextAlign.center,
-                "SERVICE\nTAK",
-                style: Theme.of(context).textTheme.displayLarge!.copyWith(),
+          return PopScope(
+            canPop: false,
+            child: Scaffold(
+              backgroundColor: kMediumGreen,
+              body: Center(
+                child: Text(
+                  textAlign: TextAlign.center,
+                  "SERVICE\nTAK",
+                  style: Theme.of(context).textTheme.displayLarge!.copyWith(),
+                ),
               ),
             ),
           );
