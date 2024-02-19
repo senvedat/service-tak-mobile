@@ -271,7 +271,9 @@ class CameraScreen extends StatelessWidget {
     return Align(
       alignment: Alignment.topCenter,
       child: Text(
-        "Guest 1 Photo",
+        viewModel.localImage.isNotEmpty || (imageUrl?.isNotEmpty ?? false)
+            ? "Guest Photo"
+            : "",
         style: Theme.of(context).textTheme.displaySmall!.copyWith(
               fontWeight: FontWeight.w700,
               color: kBlack,
