@@ -109,23 +109,31 @@ class ReceptionOpenScreen extends StatelessWidget {
           borderRadius: BorderRadius.circular(18),
         ),
       ),
-      onPressed: () async {
-        viewModel.roomNumberFocusNode.unfocus();
+      onPressed: viewModel.isButtonLoading
+          ? null
+          : () async {
+              viewModel.roomNumberFocusNode.unfocus();
 
-        await viewModel
-            .checkExistRoom(viewModel.roomNumberController.text, context)
-            .then((value) async {
-          if (viewModel.errorResponse != null) {
-            await showDialog(
-                context: context,
-                builder: (context) => _errorDialog(context, viewModel));
-          }
-        });
-      },
-      child: Text(
-        "Go To Room Detail",
-        style: Theme.of(context).textTheme.labelLarge,
-      ),
+              await viewModel
+                  .checkExistRoom(viewModel.roomNumberController.text, context)
+                  .then((value) async {
+                if (viewModel.errorResponse != null) {
+                  await showDialog(
+                      context: context,
+                      builder: (context) => _errorDialog(context, viewModel));
+                }
+              });
+            },
+      child: viewModel.isButtonLoading
+          ? const Center(
+              child: CircularProgressIndicator(
+                color: kWhite,
+              ),
+            )
+          : Text(
+              "Go To Room Detail",
+              style: Theme.of(context).textTheme.labelLarge,
+            ),
     );
   }
 
@@ -156,9 +164,10 @@ class ReceptionOpenScreen extends StatelessWidget {
                     Image.asset(
                       "assets/images/error.png",
                     ),
-                    emptySpaceHeight(context, 0.08),
+                    emptySpaceHeight(context, 0.03),
                     Text(
                       viewModel.errorResponse?.message ?? "",
+                      textAlign: TextAlign.center,
                       style: Theme.of(context)
                           .textTheme
                           .displayLarge!
