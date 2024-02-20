@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:service_tak_mobile/locator.dart';
 import 'package:service_tak_mobile/model/helper/helper_model.dart';
 import 'package:service_tak_mobile/model/hotel/current_hotel_model.dart';
+import 'package:service_tak_mobile/service/hotel/hotel_guest_service.dart';
 import 'package:service_tak_mobile/service/hotel/hotel_room_service.dart';
 import 'package:service_tak_mobile/service/hotel/hotel_service.dart';
 import 'package:service_tak_mobile/service/local/local_storage_service.dart';
@@ -12,8 +13,9 @@ import 'package:service_tak_mobile/utils/navigation_helper.dart';
 import 'package:service_tak_mobile/view/reception/room_screen.dart';
 
 class ReceptionOpenViewModel extends ChangeNotifier {
-  final HotelService _hotelService = locator<HotelService>();
-  final HotelRoomService _hotelRoomService = locator<HotelRoomService>();
+  final HotelService _hotelService = locator.get<HotelService>();
+  final HotelRoomService _hotelRoomService = locator.get<HotelRoomService>();
+  final HotelGuestService _guestService = locator.get<HotelGuestService>();
   ReceptionOpenViewModel() {
     debugPrint("Reception Open VM Called");
 
@@ -25,6 +27,7 @@ class ReceptionOpenViewModel extends ChangeNotifier {
   final FocusNode _roomNumberFocusNode = FocusNode();
   Hotel? _hotel;
   bool _isPageLoaded = false;
+  bool _isButtonLoading = false;
   ErrorResponse? _errorResponse;
 
   // Getters
@@ -32,6 +35,7 @@ class ReceptionOpenViewModel extends ChangeNotifier {
   FocusNode get roomNumberFocusNode => _roomNumberFocusNode;
   Hotel? get hotel => _hotel;
   bool get isPageLoaded => _isPageLoaded;
+  bool get isButtonLoading => _isButtonLoading;
   ErrorResponse? get errorResponse => _errorResponse;
 
   // Methods
@@ -42,6 +46,11 @@ class ReceptionOpenViewModel extends ChangeNotifier {
 
   set setIsPageLoaded(bool value) {
     _isPageLoaded = value;
+    notifyListeners();
+  }
+
+  set setIsButtonLoading(bool value) {
+    _isButtonLoading = value;
     notifyListeners();
   }
 
@@ -93,7 +102,7 @@ class ReceptionOpenViewModel extends ChangeNotifier {
                   hotel: _hotel!,
                 ));
           } else {
-            setErrorResponse = ErrorResponse(message: "Room Not Found");
+            await createGuest(context);
           }
         } else {
           setErrorResponse = ErrorResponse.fromJson(jsonDecode(response.body));
@@ -103,6 +112,33 @@ class ReceptionOpenViewModel extends ChangeNotifier {
     );
 
     _roomNumberController.clear();
+    notifyListeners();
+  }
+
+  Future<void> createGuest(BuildContext context) async {
+    setIsButtonLoading = true;
+    String authToken =
+        LocalStorageService.instance.getString(LocalStorageKeys.userAuthToken);
+    var response = await _guestService.createGuest(
+        authToken, _roomNumberController.text, "", "");
+
+    if (response.statusCode == 200) {
+      await LocalStorageService.instance
+          .setString(LocalStorageKeys.roomNumber, _roomNumberController.text);
+      setIsButtonLoading = false;
+      setErrorResponse = null;
+      if (!context.mounted) return;
+      await navigatorPush(
+          context,
+          RoomScreen(
+            type: _hotel!.type,
+            hotel: _hotel!,
+          ));
+    } else {
+      setIsButtonLoading = false;
+      setErrorResponse = ErrorResponse.fromJson(jsonDecode(response.body));
+      debugPrint("Room Data Not Found");
+    }
     notifyListeners();
   }
 }
