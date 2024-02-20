@@ -139,8 +139,8 @@ class RoomViewModel extends ChangeNotifier {
   }
 
   void initialize() {
-    setChosenEntryDate = DateFormat("yyyy-MM-dd").parse(room!.startDate!);
-    setChosenReleaseDate = DateFormat("yyyy-MM-dd").parse(room!.endDate!);
+    setChosenEntryDate = room!.startDate != null ? DateFormat("yyyy-MM-dd").parse(room!.startDate!) : DateTime.now();
+    setChosenReleaseDate = room!.endDate != null ?  DateFormat("yyyy-MM-dd").parse(room!.endDate!) : DateTime.now().add(const Duration(days: 7));
   }
 
   bool isButtonActive() {

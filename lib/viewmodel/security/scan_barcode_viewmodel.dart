@@ -147,7 +147,7 @@ class ScanBarcodeViewModel extends ChangeNotifier {
     _controller1!.scannedDataStream.listen((barcode) async {
       setBarcode = barcode;
       if (barcode.code != null && barcode.code!.isNotEmpty) {
-        _controller1!.pauseCamera();
+        _controller1?.pauseCamera();
         await _getQrFromService(context);
       }
     });
@@ -186,7 +186,7 @@ class ScanBarcodeViewModel extends ChangeNotifier {
     var response = await _workerService.getQr(
         authToken, _secondBarcode ?? _barcode!.code!);
     if (response.statusCode == 200) {
-      _controller1!.pauseCamera();
+      _controller1?.pauseCamera();
       debugPrint("QR Found");
       String type = _worker?.hotel?.type ?? "";
       String role = _worker?.role ?? "";
