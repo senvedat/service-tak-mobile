@@ -35,12 +35,14 @@ class ReceptionScanBarcodeViewModel extends ChangeNotifier
   PermissionStatus? _status;
   QRViewController? _controller1;
   Barcode? _barcode;
+  String? _secondBarcode;
   final GlobalKey _key = GlobalKey();
   NewGuest? _guest;
   Hotel? _hotel;
   bool _isPageLoaded = false;
   bool _isUpdating = false;
   bool? _isEdit;
+    bool _isSecondBarcodeActive = false;
   ErrorResponse? _errorResponse;
   int? _roomId;
   String? _qrType;
@@ -49,12 +51,14 @@ class ReceptionScanBarcodeViewModel extends ChangeNotifier
   PermissionStatus? get status => _status;
   QRViewController? get controller1 => _controller1;
   Barcode? get barcode => _barcode;
+  String? get secondBarcode => _secondBarcode;
   GlobalKey get key => _key;
   NewGuest? get guest => _guest;
   Hotel? get hotel => _hotel;
   bool get isPageLoaded => _isPageLoaded;
   bool get isUpdating => _isUpdating;
   bool? get isEdit => _isEdit;
+  bool get isSecondBarcodeActive => _isSecondBarcodeActive;
   ErrorResponse? get errorResponse => _errorResponse;
   int get roomId => _roomId!;
   String? get qrType => _qrType;
@@ -73,6 +77,11 @@ class ReceptionScanBarcodeViewModel extends ChangeNotifier
 
   set setBarcode(Barcode? value) {
     _barcode = value;
+    notifyListeners();
+  }
+
+  set setSecondBarcode(String? value) {
+    _secondBarcode = value;
     notifyListeners();
   }
 
@@ -98,6 +107,11 @@ class ReceptionScanBarcodeViewModel extends ChangeNotifier
 
   set setIsEdit(bool? value) {
     _isEdit = value;
+    notifyListeners();
+  }
+
+  set setIsSecondBarcodeActive(bool value) {
+    _isSecondBarcodeActive = value;
     notifyListeners();
   }
 
@@ -165,12 +179,13 @@ class ReceptionScanBarcodeViewModel extends ChangeNotifier
   }
 
   Future<void> scanQr2(BuildContext context) async {
-    FlutterBarcodeScanner.getBarcodeStreamReceiver(
-            '#ff6666', 'Cancel', true, ScanMode.QR)!
-        .listen((barcode) async {
-      debugPrint(barcode);
-      setBarcode = barcode;
-      if (barcode.code != null && barcode.code!.isNotEmpty) {
+    String barcodeScanRes = "";
+    try {
+      barcodeScanRes = await FlutterBarcodeScanner.scanBarcode(
+          "#00000000", 'Cancel', true, ScanMode.QR);
+      debugPrint("Scan barcode res: $barcodeScanRes");
+      setSecondBarcode = barcodeScanRes == "-1" ? null : barcodeScanRes;
+      if (_secondBarcode != null && _secondBarcode!.isNotEmpty) {
         if (_qrType == "card") {
           if (_isEdit!) {
             await _updateCardQr();
@@ -181,7 +196,9 @@ class ReceptionScanBarcodeViewModel extends ChangeNotifier
           await _updateBraceletQr();
         }
       }
-    });
+    } catch (e) {
+      debugPrint("Error can barcode 2: $e");
+    }
   }
 
   Future<void> _updateBraceletQr() async {
@@ -190,7 +207,7 @@ class ReceptionScanBarcodeViewModel extends ChangeNotifier
     );
 
     var response = await _guestService.braceletUpdateQr(
-        authToken, _guest!.id!, _barcode!.code!);
+        authToken, _guest!.id!, _secondBarcode ?? _barcode!.code!);
 
     if (response.statusCode == 200) {
       await LocalStorageService.instance
