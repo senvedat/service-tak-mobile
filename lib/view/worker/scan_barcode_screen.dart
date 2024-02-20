@@ -61,7 +61,7 @@ class ScanBarcodeScreen extends StatelessWidget {
     );
   }
 
-  Padding _body(BuildContext context, ScanBarcodeViewModel viewModel) {
+  Widget _body(BuildContext context, ScanBarcodeViewModel viewModel) {
     if (!viewModel.isPageLoaded && viewModel.errorResponse == null) {
       return Padding(
         padding: EdgeInsets.only(top: getDynamicHeight(context, 0.34)),
@@ -87,47 +87,54 @@ class ScanBarcodeScreen extends StatelessWidget {
         ),
       );
     } else {
-      return Padding(
-        padding: EdgeInsets.symmetric(
-          horizontal: getDynamicWidth(context, 0.06),
-        ),
-        child: Column(
-          children: [
-            _header(context, viewModel),
-            emptySpaceHeight(context, 0.02),
-            const Divider(
-              color: kTextFieldUnderline,
-            ),
-            emptySpaceHeight(context, 0.02),
-            (viewModel.status?.isDenied == false) || viewModel.isUpdating
-                ? SizedBox(
-                    height: getDynamicHeight(context, 0.5),
-                    width: getDynamicWidth(context, 1),
-                    child: QRView(
-                        key: viewModel.key,
-                        onQRViewCreated: (QRViewController controller) async {
-                          await viewModel.scanQr1(controller, context);
-                        }),
-                  )
-                : SizedBox(
-                    height: getDynamicHeight(context, 0.5),
-                    width: getDynamicWidth(context, 1),
-                    child: const ColoredBox(color: kTransparent)),
-            emptySpaceHeight(context, 0.02),
-            const Divider(
-              color: kTextFieldUnderline,
-            ),
-            emptySpaceHeight(context, 0.01),
-            Text(
-              "if you have a problem for scan, please use this button",
-              textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.bodySmall!.copyWith(
-                    fontSize: getDynamicHeight(context, 0.014),
-                  ),
-            ),
-            emptySpaceHeight(context, 0.01),
-            _button(context, viewModel),
-          ],
+      return SingleChildScrollView(
+        child: Padding(
+          padding: EdgeInsets.symmetric(
+            horizontal: getDynamicWidth(context, 0.06),
+          ),
+          child: Column(
+            children: [
+              _header(context, viewModel),
+              emptySpaceHeight(context, 0.02),
+              const Divider(
+                color: kTextFieldUnderline,
+              ),
+              emptySpaceHeight(
+                  context, viewModel.isSecondBarcodeActive ? 0.0 : 0.5),
+              viewModel.isSecondBarcodeActive
+                  ? (viewModel.status?.isGranted ?? false) ||
+                          viewModel.isUpdating
+                      ? SizedBox(
+                          height: getDynamicHeight(context, 0.5),
+                          width: getDynamicWidth(context, 1),
+                          child: QRView(
+                            key: viewModel.key,
+                            onQRViewCreated:
+                                (QRViewController controller) async {
+                              await viewModel.scanQr1(controller, context);
+                            },
+                          ),
+                        )
+                      : SizedBox(
+                          height: getDynamicHeight(context, 0.5),
+                          width: getDynamicWidth(context, 1),
+                          child: const ColoredBox(color: kTransparent))
+                  : const SizedBox.shrink(),
+              emptySpaceHeight(
+                  context, viewModel.isSecondBarcodeActive ? 0.02 : 0.0),
+              viewModel.isSecondBarcodeActive
+                  ? const Divider(
+                      color: kTextFieldUnderline,
+                    )
+                  : const SizedBox.shrink(),
+              emptySpaceHeight(
+                  context, viewModel.isSecondBarcodeActive ? 0.02 : 0.0),
+              _button(context, viewModel, false),
+              emptySpaceHeight(context, 0.02),
+              _button(context, viewModel, true),
+              emptySpaceHeight(context, 0.02),
+            ],
+          ),
         ),
       );
     }
@@ -154,10 +161,12 @@ class ScanBarcodeScreen extends StatelessWidget {
   //   );
   // }
 
-  ElevatedButton _button(BuildContext context, ScanBarcodeViewModel viewModel) {
+  ElevatedButton _button(
+      BuildContext context, ScanBarcodeViewModel viewModel, bool isSecond) {
     return ElevatedButton(
       style: ElevatedButton.styleFrom(
-        backgroundColor: kMediumGreen,
+        backgroundColor:
+            !isSecond ? kMediumGreen : kMediumGreen.withOpacity(0.7),
         minimumSize:
             Size(getDynamicWidth(context, 1), getDynamicHeight(context, 0.075)),
         shape: RoundedRectangleBorder(
@@ -165,10 +174,22 @@ class ScanBarcodeScreen extends StatelessWidget {
         ),
       ),
       onPressed: () async {
-        await viewModel.scanQr2(context);
+        if (!isSecond) {
+          await viewModel.scanQr2(context);
+        } else {
+          if (viewModel.isSecondBarcodeActive) {
+            viewModel.setIsSecondBarcodeActive = false;
+          } else {
+            viewModel.setIsSecondBarcodeActive = true;
+          }
+        }
       },
       child: Text(
-        "Try Alternative Scanner",
+        !isSecond
+            ? "Scan"
+            : viewModel.isSecondBarcodeActive
+                ? "Close Alternative Scanner"
+                : "Try Alternative Scanner",
         style: Theme.of(context).textTheme.labelLarge,
       ),
     );
