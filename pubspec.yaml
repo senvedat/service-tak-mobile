@@ -10,6 +10,7 @@ environment:
 dependencies:
   cached_network_image: ^3.3.1
   calendar_date_picker2: ^0.5.3
+  camera: ^0.10.5+9
   cupertino_icons: ^1.0.6
   dio: ^5.4.1
   flutter:
