@@ -177,7 +177,7 @@ class CameraScreen extends StatelessWidget {
         ),
       ),
       onPressed: () async {
-        if (viewModel.status?.isGranted ?? false) {
+        if (viewModel.status?.isDenied != true) {
           debugPrint("Camera access is granted.");
           viewModel.pickImage(context, ImageSource.camera);
         } else if (viewModel.status?.isPermanentlyDenied ?? false) {
