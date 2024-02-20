@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -11,6 +12,7 @@ import 'package:service_tak_mobile/model/worker/qr_bracelet_model.dart';
 import 'package:service_tak_mobile/model/worker/qr_card_model.dart';
 import 'package:service_tak_mobile/service/local/local_storage_service.dart';
 import 'package:service_tak_mobile/service/worker/worker_service.dart';
+import 'package:service_tak_mobile/utils/constants.dart';
 import 'package:service_tak_mobile/utils/local_storage_keys.dart';
 import 'package:service_tak_mobile/utils/navigation_helper.dart';
 import 'package:service_tak_mobile/view/worker/open_screen.dart';
@@ -24,31 +26,46 @@ class ScanBarcodeViewModel extends ChangeNotifier {
     _getCurrentWorker().then((value) {
       debugPrint("Worker Found");
 
-      _getCameraPermission();
+      _getCameraPermission().then((value) {
+        _initializeCamera();
+      });
     });
   }
 
   //Setters
+  CameraController? _cameraController;
+  bool _isCameraInitialized = false;
   PermissionStatus? _status;
   QRViewController? _controller1;
   Barcode? _barcode;
+  String? _secondBarcode;
   final GlobalKey _key = GlobalKey();
   Worker? _worker;
   bool _isPageLoaded = false;
   bool _isUpdating = false;
+  bool _isSecondBarcodeActive = false;
   ErrorResponse? _errorResponse;
 
   //Getters
+  CameraController? get cameraController => _cameraController;
+  bool get isCameraInitialized => _isCameraInitialized;
   PermissionStatus? get status => _status;
   QRViewController? get controller1 => _controller1;
   Barcode? get barcode => _barcode;
+  String? get secondBarcode => _secondBarcode;
   GlobalKey get key => _key;
   Worker? get worker => _worker;
   bool get isPageLoaded => _isPageLoaded;
   bool get isUpdating => _isUpdating;
+  bool get isSecondBarcodeActive => _isSecondBarcodeActive;
   ErrorResponse? get errorResponse => _errorResponse;
 
   //Functions
+
+  set setIsCameraInitialized(bool value) {
+    _isCameraInitialized = value;
+    notifyListeners();
+  }
 
   set setStatus(PermissionStatus? value) {
     _status = value;
@@ -62,6 +79,11 @@ class ScanBarcodeViewModel extends ChangeNotifier {
 
   set setBarcode(Barcode? value) {
     _barcode = value;
+    notifyListeners();
+  }
+
+  set setSecondBarcode(String? value) {
+    _secondBarcode = value;
     notifyListeners();
   }
 
@@ -80,9 +102,31 @@ class ScanBarcodeViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  set setIsSecondBarcodeActive(bool value) {
+    _isSecondBarcodeActive = value;
+    notifyListeners();
+  }
+
   set setErrorResponse(ErrorResponse? value) {
     _errorResponse = value;
     notifyListeners();
+  }
+
+  void _initializeCamera() {
+    availableCameras().then((cameras) {
+      print("Avaliable Cameras: $cameras");
+      final rearCamera = cameras.firstWhere(
+          (camera) => camera.lensDirection == CameraLensDirection.back,
+          orElse: () => cameras.first);
+
+      print("Rear Camera: $rearCamera");
+
+      _cameraController =
+          CameraController(rearCamera, ResolutionPreset.ultraHigh);
+      _cameraController!.initialize().then((value) {
+        setIsCameraInitialized = true;
+      });
+    });
   }
 
   Future<void> _getCameraPermission() async {
@@ -100,13 +144,16 @@ class ScanBarcodeViewModel extends ChangeNotifier {
   Future<void> scanQr1(
       QRViewController controller, BuildContext context) async {
     setController1 = controller;
-    controller.scannedDataStream.listen((barcode) async {
+    _controller1!.scannedDataStream.listen((barcode) async {
       setBarcode = barcode;
       if (barcode.code != null && barcode.code!.isNotEmpty) {
-        controller.pauseCamera();
+        _controller1!.pauseCamera();
         await _getQrFromService(context);
       }
     });
+
+    // await _cameraController!.setFocusPoint(const Offset(0.5, 0.5));
+    // await _cameraController!.setFocusMode(FocusMode.locked);
 
     controller.getCameraInfo().then((camera) {
       debugPrint(camera.toString());
@@ -117,22 +164,29 @@ class ScanBarcodeViewModel extends ChangeNotifier {
   }
 
   Future<void> scanQr2(BuildContext context) async {
-    FlutterBarcodeScanner.getBarcodeStreamReceiver(
-            '#ff6666', 'Cancel', true, ScanMode.QR)!
-        .listen((barcode) async {
-      debugPrint(barcode);
-      setBarcode = barcode;
-      if (barcode.code != null && barcode.code!.isNotEmpty) {
+    String barcodeScanRes = "";
+    try {
+      barcodeScanRes = await FlutterBarcodeScanner.scanBarcode(
+          "#00000000", 'Cancel', true, ScanMode.QR);
+      debugPrint("Scan barcode res: $barcodeScanRes");
+      setSecondBarcode = barcodeScanRes == "-1" ? null : barcodeScanRes;
+      print("Second Barcode: $_secondBarcode");
+      if (_secondBarcode != null && _secondBarcode!.isNotEmpty) {
+        if (!context.mounted) return;
         await _getQrFromService(context);
       }
-    });
+    } catch (e) {
+      debugPrint("Error can barcode 2: $e");
+    }
   }
 
   Future<bool> _getQrFromService(BuildContext context) async {
     String authToken =
         LocalStorageService.instance.getString(LocalStorageKeys.userAuthToken);
-    var response = await _workerService.getQr(authToken, _barcode!.code!);
+    var response = await _workerService.getQr(
+        authToken, _secondBarcode ?? _barcode!.code!);
     if (response.statusCode == 200) {
+      _controller1!.pauseCamera();
       debugPrint("QR Found");
       String type = _worker?.hotel?.type ?? "";
       String role = _worker?.role ?? "";
