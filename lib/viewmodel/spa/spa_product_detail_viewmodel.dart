@@ -120,7 +120,9 @@ class SpaProductDetailViewModel extends ChangeNotifier {
         setImageUrl = _qrBracelet!.guest?.passport ?? "";
         setBarcodeUrl = _qrBracelet!.url ?? "";
         setIsSwitched = _qrBracelet!.guest?.towel ?? false;
-        setGuestId = _qrBracelet!.guest!.id!;
+        if (qrBracelet?.guest != null) {
+          setGuestId = _qrBracelet!.guest!.id!;
+        }
         setTowelHistories = _qrBracelet!.guest?.towelHistories ?? [];
       }
     } else {
@@ -130,7 +132,8 @@ class SpaProductDetailViewModel extends ChangeNotifier {
         setReleaseDate = _qrCard!.roomQr!.room?.endDate ?? "";
         setImageUrl = _qrCard!.roomQr!.room?.guests[_guestIndex].passport ?? "";
         setBarcodeUrl = _qrCard!.url ?? "";
-        setIsSwitched = _qrCard!.roomQr!.room?.guests[_guestIndex].towel ?? false;
+        setIsSwitched =
+            _qrCard!.roomQr!.room?.guests[_guestIndex].towel ?? false;
         setGuestId = _qrCard!.roomQr!.room!.guests[_guestIndex].id!;
         setTowelHistories =
             _qrCard!.roomQr?.room?.guests[_guestIndex].towelHistories ?? [];

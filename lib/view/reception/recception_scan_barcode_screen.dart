@@ -89,7 +89,7 @@ class ReceptionScanBarcodeScreen extends StatelessWidget {
               color: kTextFieldUnderline,
             ),
             emptySpaceHeight(context, 0.02),
-            (viewModel.status?.isGranted ?? false) || viewModel.isUpdating
+            (viewModel.status?.isDenied == false) || viewModel.isUpdating
                 ? SizedBox(
                     height: getDynamicHeight(context, 0.5),
                     width: getDynamicWidth(context, 1),

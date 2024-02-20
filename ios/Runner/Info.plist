@@ -4,12 +4,9 @@
 <dict>
 	<key>io.flutter.embedded_views_preview</key>
 	<key>NSAppTransportSecurity</key>
-<dict>
     <key>NSAllowsArbitraryLoads</key>
     <true/>
-</dict>
-	<true/>
-		<key>NSCameraUsageDescription</key>
+	<key>NSCameraUsageDescription</key>
 	<string>We need this permission to upload your photo and scan QR codes. Please accept permission to upload and change photos and QRs.</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>We need this permission to upload your photo. Please accept permission to upload and change photos.</string>
@@ -37,10 +34,6 @@
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
-	<key>NSCameraUsageDescription</key>
-	<string>This app needs camera access to scan QR codes</string>
-	<key>UIApplicationSupportsIndirectInputEvents</key>
-	<true/>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>
@@ -58,7 +51,9 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
-	<key>io.flutter.embedded_views_preview</key>
+	<key>CADisableMinimumFrameDurationOnPhone</key>
+	<true/>
+	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 </dict>
 </plist>
