@@ -265,7 +265,7 @@ class ReceptionOpenScreen extends StatelessWidget {
             borderRadius: BorderRadius.circular(8),
             child: CachedNetworkImage(
               imageUrl: viewModel.hotel?.logo ?? "",
-              fit: BoxFit.cover,
+              fit: BoxFit.contain,
               placeholder: (context, _) {
                 return const Center(
                   child: CircularProgressIndicator(
