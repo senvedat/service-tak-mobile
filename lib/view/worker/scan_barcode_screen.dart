@@ -102,10 +102,9 @@ class ScanBarcodeScreen extends StatelessWidget {
               emptySpaceHeight(
                   context, viewModel.isSecondBarcodeActive ? 0.0 : 0.5),
               viewModel.isSecondBarcodeActive
-                  ? (viewModel.status?.isGranted ?? false) ||
-                          viewModel.isUpdating
+                  ? (viewModel.status?.isDenied != true) || viewModel.isUpdating
                       ? SizedBox(
-                          height: getDynamicHeight(context, 0.5),
+                          height: getDynamicHeight(context, 0.44),
                           width: getDynamicWidth(context, 1),
                           child: QRView(
                             key: viewModel.key,
