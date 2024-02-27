@@ -89,6 +89,7 @@ class CameraScreen extends StatelessWidget {
         image: viewModel.localImage.isEmpty
             ? null
             : DecorationImage(
+              fit: BoxFit.contain,
                 image: Image.memory(base64Decode(viewModel.localImage),
                         gaplessPlayback: true)
                     .image),
@@ -109,7 +110,7 @@ class CameraScreen extends StatelessWidget {
                   borderRadius: BorderRadius.circular(8),
                   child: CachedNetworkImage(
                     imageUrl: imageUrl ?? "",
-                    fit: BoxFit.cover,
+                    fit: BoxFit.contain,
                     placeholder: (context, _) {
                       return const Center(
                         child: CircularProgressIndicator(
@@ -297,7 +298,7 @@ class CameraScreen extends StatelessWidget {
             borderRadius: BorderRadius.circular(8),
             child: CachedNetworkImage(
               imageUrl: hotel?.logo ?? "",
-              fit: BoxFit.cover,
+              fit: BoxFit.contain,
               placeholder: (context, _) {
                 return const Center(
                   child: CircularProgressIndicator(
