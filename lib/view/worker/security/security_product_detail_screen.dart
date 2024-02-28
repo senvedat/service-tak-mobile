@@ -130,7 +130,7 @@ class SecurityProductDetailScreen extends StatelessWidget {
         child: viewModel.imageUrl.isNotEmpty
             ? CachedNetworkImage(
                 imageUrl: viewModel.imageUrl,
-                fit: BoxFit.cover,
+                fit: BoxFit.contain,
                 placeholder: (context, _) {
                   return const Center(
                     child: CircularProgressIndicator(
