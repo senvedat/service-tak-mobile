@@ -63,7 +63,7 @@ class OpenScreen extends StatelessWidget {
             borderRadius: BorderRadius.circular(8),
             child: CachedNetworkImage(
               imageUrl: viewModel.worker?.hotel?.logo ?? "",
-              fit: BoxFit.cover,
+              fit: BoxFit.contain,
               placeholder: (context, _) {
                 return const Center(
                   child: CircularProgressIndicator(
@@ -166,7 +166,7 @@ class OpenScreen extends StatelessWidget {
                       child: guest.passport != null
                           ? CachedNetworkImage(
                               imageUrl: guest.passport ?? "",
-                              fit: BoxFit.cover,
+                              fit: BoxFit.contain,
                               placeholder: (context, _) {
                                 return Center(
                                   child: SizedBox(

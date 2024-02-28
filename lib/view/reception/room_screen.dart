@@ -249,11 +249,7 @@ class RoomScreen extends StatelessWidget {
             width: getDynamicWidth(
                 context, isQr && viewModel.qrType == "card" ? 0.3 : 0.18),
             decoration: BoxDecoration(
-              color: isQr && viewModel.qrList.isEmpty
-                  ? kTextGrey.withOpacity(0.05)
-                  : viewModel.room!.guests[index].passport == null
-                      ? kTextGrey.withOpacity(0.05)
-                      : kWhite,
+              color: kTextGrey.withOpacity(0.05),
               borderRadius: BorderRadius.circular(8),
             ),
             child: ClipRRect(
@@ -261,7 +257,7 @@ class RoomScreen extends StatelessWidget {
               child: isQr
                   ? viewModel.qrList.isNotEmpty
                       ? SvgPicture.network(viewModel.qrList[index].svg ?? "",
-                          fit: BoxFit.cover,
+                          fit: BoxFit.contain,
                           placeholderBuilder: (context) => const Center(
                                 child: CircularProgressIndicator(
                                   color: kMediumGreen,
@@ -286,7 +282,7 @@ class RoomScreen extends StatelessWidget {
                   : viewModel.room!.guests[index].passport != null
                       ? CachedNetworkImage(
                           imageUrl: viewModel.room!.guests[index].passport!,
-                          fit: BoxFit.cover,
+                          fit: BoxFit.contain,
                           placeholder: (context, _) {
                             return Center(
                               child: SizedBox(
@@ -818,7 +814,7 @@ class RoomScreen extends StatelessWidget {
             borderRadius: BorderRadius.circular(8),
             child: CachedNetworkImage(
               imageUrl: hotel?.logo ?? "",
-              fit: BoxFit.cover,
+              fit: BoxFit.contain,
               placeholder: (context, _) {
                 return const Center(
                   child: CircularProgressIndicator(
