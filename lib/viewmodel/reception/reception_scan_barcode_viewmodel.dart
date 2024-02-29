@@ -184,7 +184,6 @@ class ReceptionScanBarcodeViewModel extends ChangeNotifier
     try {
       barcodeScanRes = await FlutterBarcodeScanner.scanBarcode(
           "#00000000", 'Cancel', true, ScanMode.QR);
-      print("Scan barcode res: $barcodeScanRes");
       setSecondBarcode = barcodeScanRes == "-1" ? null : barcodeScanRes;
       if (_secondBarcode != null && _secondBarcode!.isNotEmpty) {
         if (_qrType == "card") {
@@ -209,32 +208,30 @@ class ReceptionScanBarcodeViewModel extends ChangeNotifier
 
     var response = await _guestService.braceletUpdateQr(
         authToken, _guest!.id!, _secondBarcode ?? _barcode!.code!);
-
-    if (response.statusCode == 200) {
-      if (jsonDecode(response.body)['status'] == "warning") {
-        if (!context.mounted) return;
-        await showDialog(
-          context: context,
-          builder: (context) => QrNotFoundDialog(
-            onPressed: () {
-              Navigator.pop(context);
-              _controller1?.resumeCamera();
-            },
+    if (jsonDecode(response.body)['title'] == "Success") {
+      navigatorPushReplacement(
+          context,
+          RoomScreen(
+            hotel: _hotel,
+            type: _qrType,
           ),
-        );
-      } else {
-        await LocalStorageService.instance
-            .deleteItem(LocalStorageKeys.localImage);
-        await navigatorPushReplacement(
-            _key.currentContext!,
-            RoomScreen(
-              hotel: _hotel,
-              type: _qrType,
-            ),
-            "");
-      }
+          "");
+      await LocalStorageService.instance
+          .deleteItem(LocalStorageKeys.localImage);
+    } else if (jsonDecode(response.body)['title'] == "Warning") {
+      if (!context.mounted) return;
+      await showDialog(
+        context: context,
+        builder: (context) => QrNotFoundDialog(
+          onPressed: () {
+            Navigator.pop(context);
+            _controller1?.resumeCamera();
+          },
+        ),
+      );
     } else {
       setErrorResponse = ErrorResponse.fromJson(json.decode(response.body));
+      notifyListeners();
     }
   }
 
@@ -259,7 +256,7 @@ class ReceptionScanBarcodeViewModel extends ChangeNotifier
         );
       } else {
         await navigatorPushReplacement(
-            _key.currentContext!,
+            context,
             RoomScreen(
               hotel: _hotel,
               type: _qrType,
@@ -293,7 +290,7 @@ class ReceptionScanBarcodeViewModel extends ChangeNotifier
         );
       } else {
         await navigatorPushReplacement(
-            _key.currentContext!,
+            context,
             RoomScreen(
               hotel: _hotel,
               type: _qrType,

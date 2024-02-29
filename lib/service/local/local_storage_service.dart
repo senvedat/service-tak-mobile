@@ -33,7 +33,7 @@ class LocalStorageService {
     await _preferences!.setBool(key.toString(), value);
   }
 
-  String getString(LocalStorageKeys key) =>
+  String  getString(LocalStorageKeys key) =>
       _preferences!.getString(key.toString()) ?? '';
 
   int getInt(LocalStorageKeys key) => _preferences!.getInt(key.toString()) ?? 0;
