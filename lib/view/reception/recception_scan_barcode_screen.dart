@@ -69,11 +69,18 @@ class ReceptionScanBarcodeScreen extends StatelessWidget {
             right: getDynamicWidth(context, 0.06),
             top: getDynamicHeight(context, 0.34)),
         child: Center(
-          child: Text(
-            viewModel.errorResponse!.message!,
-            style: Theme.of(context).textTheme.bodyLarge!.copyWith(
-                  color: kBlack,
-                ),
+          child: Column(
+            children: [
+              Text(
+                viewModel.errorResponse!.message!,
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.bodyLarge!.copyWith(
+                      color: kBlack,
+                    ),
+              ),
+              emptySpaceHeight(context, 0.05),
+              _errorButton(context, viewModel),
+            ],
           ),
         ),
       );
@@ -147,6 +154,27 @@ class ReceptionScanBarcodeScreen extends StatelessWidget {
   //     ),
   //   );
   // }
+
+  ElevatedButton _errorButton(
+      BuildContext context, ReceptionScanBarcodeViewModel viewModel) {
+    return ElevatedButton(
+      style: ElevatedButton.styleFrom(
+        backgroundColor: kMediumGreen,
+        minimumSize: Size(
+            getDynamicWidth(context, 0.6), getDynamicHeight(context, 0.075)),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(18),
+        ),
+      ),
+      onPressed: () async {
+        viewModel.setErrorResponse = null;
+      },
+      child: Text(
+        "Try Again",
+        style: Theme.of(context).textTheme.labelLarge,
+      ),
+    );
+  }
 
   ElevatedButton _button(BuildContext context,
       ReceptionScanBarcodeViewModel viewModel, bool isSecond) {
