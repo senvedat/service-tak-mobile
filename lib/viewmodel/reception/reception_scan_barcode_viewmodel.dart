@@ -14,6 +14,7 @@ import 'package:service_tak_mobile/service/local/local_storage_service.dart';
 import 'package:service_tak_mobile/utils/local_storage_keys.dart';
 import 'package:service_tak_mobile/utils/navigation_helper.dart';
 import 'package:service_tak_mobile/view/reception/room_screen.dart';
+import 'package:service_tak_mobile/view/widget/qr_not_found_dialog.dart';
 
 class ReceptionScanBarcodeViewModel extends ChangeNotifier
     with WidgetsBindingObserver {
@@ -42,7 +43,7 @@ class ReceptionScanBarcodeViewModel extends ChangeNotifier
   bool _isPageLoaded = false;
   bool _isUpdating = false;
   bool? _isEdit;
-    bool _isSecondBarcodeActive = false;
+  bool _isSecondBarcodeActive = false;
   ErrorResponse? _errorResponse;
   int? _roomId;
   String? _qrType;
@@ -160,12 +161,12 @@ class ReceptionScanBarcodeViewModel extends ChangeNotifier
         controller.pauseCamera();
         if (_qrType == "card") {
           if (_isEdit!) {
-            await _updateCardQr();
+            await _updateCardQr(context);
           } else {
-            await _createCardQr();
+            await _createCardQr(context);
           }
         } else {
-          await _updateBraceletQr();
+          await _updateBraceletQr(context);
         }
       }
     });
@@ -183,17 +184,17 @@ class ReceptionScanBarcodeViewModel extends ChangeNotifier
     try {
       barcodeScanRes = await FlutterBarcodeScanner.scanBarcode(
           "#00000000", 'Cancel', true, ScanMode.QR);
-      debugPrint("Scan barcode res: $barcodeScanRes");
+      print("Scan barcode res: $barcodeScanRes");
       setSecondBarcode = barcodeScanRes == "-1" ? null : barcodeScanRes;
       if (_secondBarcode != null && _secondBarcode!.isNotEmpty) {
         if (_qrType == "card") {
           if (_isEdit!) {
-            await _updateCardQr();
+            await _updateCardQr(context);
           } else {
-            await _createCardQr();
+            await _createCardQr(context);
           }
         } else {
-          await _updateBraceletQr();
+          await _updateBraceletQr(context);
         }
       }
     } catch (e) {
@@ -201,7 +202,7 @@ class ReceptionScanBarcodeViewModel extends ChangeNotifier
     }
   }
 
-  Future<void> _updateBraceletQr() async {
+  Future<void> _updateBraceletQr(BuildContext context) async {
     final String authToken = LocalStorageService.instance.getString(
       LocalStorageKeys.userAuthToken,
     );
@@ -210,21 +211,34 @@ class ReceptionScanBarcodeViewModel extends ChangeNotifier
         authToken, _guest!.id!, _secondBarcode ?? _barcode!.code!);
 
     if (response.statusCode == 200) {
-      await LocalStorageService.instance
-          .deleteItem(LocalStorageKeys.localImage);
-      await navigatorPushReplacement(
-          _key.currentContext!,
-          RoomScreen(
-            hotel: _hotel,
-            type: _qrType,
+      if (jsonDecode(response.body)['status'] == "warning") {
+        if (!context.mounted) return;
+        await showDialog(
+          context: context,
+          builder: (context) => QrNotFoundDialog(
+            onPressed: () {
+              Navigator.pop(context);
+              _controller1?.resumeCamera();
+            },
           ),
-          "");
+        );
+      } else {
+        await LocalStorageService.instance
+            .deleteItem(LocalStorageKeys.localImage);
+        await navigatorPushReplacement(
+            _key.currentContext!,
+            RoomScreen(
+              hotel: _hotel,
+              type: _qrType,
+            ),
+            "");
+      }
     } else {
       setErrorResponse = ErrorResponse.fromJson(json.decode(response.body));
     }
   }
 
-  Future<void> _createCardQr() async {
+  Future<void> _createCardQr(BuildContext context) async {
     final String authToken = LocalStorageService.instance.getString(
       LocalStorageKeys.userAuthToken,
     );
@@ -232,19 +246,32 @@ class ReceptionScanBarcodeViewModel extends ChangeNotifier
     var response = await _roomService.cardCreateQr(authToken, _roomId!);
 
     if (response.statusCode == 200) {
-      await navigatorPushReplacement(
-          _key.currentContext!,
-          RoomScreen(
-            hotel: _hotel,
-            type: _qrType,
+      if (jsonDecode(response.body)['status'] == "warning") {
+        if (!context.mounted) return;
+        await showDialog(
+          context: context,
+          builder: (context) => QrNotFoundDialog(
+            onPressed: () {
+              Navigator.pop(context);
+              _controller1?.resumeCamera();
+            },
           ),
-          "");
+        );
+      } else {
+        await navigatorPushReplacement(
+            _key.currentContext!,
+            RoomScreen(
+              hotel: _hotel,
+              type: _qrType,
+            ),
+            "");
+      }
     } else {
       setErrorResponse = ErrorResponse.fromJson(json.decode(response.body));
     }
   }
 
-  Future<void> _updateCardQr() async {
+  Future<void> _updateCardQr(BuildContext context) async {
     final String authToken = LocalStorageService.instance.getString(
       LocalStorageKeys.userAuthToken,
     );
@@ -253,13 +280,26 @@ class ReceptionScanBarcodeViewModel extends ChangeNotifier
         await _roomService.cardUpdateQr(authToken, _roomId!, _barcode!.code!);
 
     if (response.statusCode == 200) {
-      await navigatorPushReplacement(
-          _key.currentContext!,
-          RoomScreen(
-            hotel: _hotel,
-            type: _qrType,
+      if (jsonDecode(response.body)['status'] == "warning") {
+        if (!context.mounted) return;
+        await showDialog(
+          context: context,
+          builder: (context) => QrNotFoundDialog(
+            onPressed: () {
+              Navigator.pop(context);
+              _controller1?.resumeCamera();
+            },
           ),
-          "");
+        );
+      } else {
+        await navigatorPushReplacement(
+            _key.currentContext!,
+            RoomScreen(
+              hotel: _hotel,
+              type: _qrType,
+            ),
+            "");
+      }
     } else {
       setErrorResponse = ErrorResponse.fromJson(json.decode(response.body));
     }
