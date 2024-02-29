@@ -139,8 +139,12 @@ class RoomViewModel extends ChangeNotifier {
   }
 
   void initialize() {
-    setChosenEntryDate = room!.startDate != null ? DateFormat("yyyy-MM-dd").parse(room!.startDate!) : DateTime.now();
-    setChosenReleaseDate = room!.endDate != null ?  DateFormat("yyyy-MM-dd").parse(room!.endDate!) : DateTime.now().add(const Duration(days: 7));
+    setChosenEntryDate = room!.startDate != null
+        ? DateFormat("yyyy-MM-dd").parse(room!.startDate!)
+        : DateTime.now();
+    setChosenReleaseDate = room!.endDate != null
+        ? DateFormat("yyyy-MM-dd").parse(room!.endDate!)
+        : DateTime.now().add(const Duration(days: 7));
   }
 
   bool isButtonActive() {
@@ -175,21 +179,36 @@ class RoomViewModel extends ChangeNotifier {
     if (_room!.guests.isNotEmpty) {
       if (_qrType == "card") {
         if (_room!.guests.first.qr?.url != null) {
+          print("qr url card: ${_room!.guests.first.qr!.url}");
           var response =
               await _hotelService.qrGenerate(_room!.guests.first.qr!.url!);
           if (response.statusCode == 200) {
             GeneratedQr qr = GeneratedQr.fromJson(jsonDecode(response.body));
             setQrList = qr;
           }
+        } else {
+          setQrList = GeneratedQr(
+            status: "error",
+            svg: "",
+          );
         }
       } else {
         for (Guest guest in _room!.guests) {
           if (guest.qr?.url != null) {
+            print("qr: ${guest.qr!.url}");
             var response = await _hotelService.qrGenerate(guest.qr!.url!);
+
             if (response.statusCode == 200) {
               GeneratedQr qr = GeneratedQr.fromJson(jsonDecode(response.body));
+              print("qr: ${qr.status}");
+              print("qr: ${qr.svg}");
               setQrList = qr;
             }
+          } else {
+            setQrList = GeneratedQr(
+              status: "error",
+              svg: "",
+            );
           }
         }
       }
@@ -216,7 +235,7 @@ class RoomViewModel extends ChangeNotifier {
           CameraScreen(
             hotel: _hotel,
             guest: newGuest,
-            imageUrl: _qrList.isNotEmpty ? _room!.guests.first.passport : null,
+            imageUrl: null,
           ));
       print("rselt: $result");
       if (result == "refresh") {
@@ -257,13 +276,34 @@ class RoomViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  void datePickerOkButtonClicked(bool isPurchaseDate) {
+  Future<void> datePickerOkButtonClicked(bool isPurchaseDate) async {
     if (isPurchaseDate) {
       setChosenEntryDate = _entryDate;
+      await updateDateService();
       isEntryDatePickerClickedToggle();
     } else {
       setChosenReleaseDate = _releaseDate;
+      await updateDateService();
       isReleaseDatePickerClickedToggle();
+    }
+
+    notifyListeners();
+  }
+
+  Future<void> updateDateService() async {
+    String authToken =
+        LocalStorageService.instance.getString(LocalStorageKeys.userAuthToken);
+    var response = await _hotelRoomService.updateDate(
+        authToken,
+        _room!.roomNumber!,
+        dateFormatterYearMonthDay(_chosenEntryDate!),
+        dateFormatterYearMonthDay(_chosenReleaseDate!));
+    print("response decode: ${jsonDecode(response.body)}");
+    if (response.statusCode == 200) {
+      //  await getRoom();
+    } else {
+      setErrorResponse = ErrorResponse.fromJson(jsonDecode(response.body));
+      debugPrint("Room Data Not Found");
     }
     notifyListeners();
   }

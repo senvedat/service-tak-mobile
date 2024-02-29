@@ -219,10 +219,13 @@ class RoomScreen extends StatelessWidget {
     return GestureDetector(
       onTap: () async {
         if (isQr) {
+          NewGuest guest = NewGuest(
+              id: viewModel.room!.guests[index].id, roomId: viewModel.room!.id);
           await navigatorPush(
               context,
               ReceptionScanBarcodeScreen(
                   hotel: hotel,
+                  guest: guest,
                   roomId: viewModel.room!.guests.first.qrId,
                   isEdit: viewModel.qrType == "card"));
         } else {
@@ -256,13 +259,35 @@ class RoomScreen extends StatelessWidget {
               borderRadius: BorderRadius.circular(8),
               child: isQr
                   ? viewModel.qrList.isNotEmpty
-                      ? SvgPicture.network(viewModel.qrList[index].svg ?? "",
-                          fit: BoxFit.contain,
-                          placeholderBuilder: (context) => const Center(
-                                child: CircularProgressIndicator(
-                                  color: kMediumGreen,
-                                ),
-                              ))
+                      ? viewModel.qrList[index].svg!.isNotEmpty
+                          ? SvgPicture.string(viewModel.qrList[index].svg!,
+                              fit: BoxFit.contain,
+                              placeholderBuilder: (context) => Center(
+                                    child: SizedBox(
+                                      height: getDynamicHeight(context, 0.02),
+                                      width: getDynamicHeight(context, 0.02),
+                                      child: const CircularProgressIndicator(
+                                        color: kMediumGreen,
+                                        strokeWidth: 2,
+                                      ),
+                                    ),
+                                  ))
+                          : Center(
+                              child: Text(
+                                "No Qr",
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .bodyLarge!
+                                    .copyWith(
+                                        fontSize: getDynamicHeight(
+                                            context,
+                                            viewModel.qrType == "card"
+                                                ? 0.016
+                                                : 0.012),
+                                        letterSpacing: 0,
+                                        fontWeight: FontWeight.w600),
+                              ),
+                            )
                       : Center(
                           child: Text(
                             "No Qr",

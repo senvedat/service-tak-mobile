@@ -149,4 +149,34 @@ class HotelRoomService {
       return [];
     }
   }
+
+  Future updateDate(String authToken, String roomNumber, String startDate,
+      String endDate) async {
+    try {
+      final apiUrl = Uri.parse('$kBaseUrl/api/hotel/room/date-update');
+
+      final response = await http.post(
+        apiUrl,
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": 'Bearer $authToken'
+        },
+        body: jsonEncode(<String, String>{
+          "room_number": roomNumber,
+          "start_date": startDate,
+          "end_date": endDate
+        }),
+      );
+
+      if (response.statusCode == 200 && response.body.isNotEmpty) {
+        return response;
+      } else {
+        debugPrint("hotel/summary Endpoint Error");
+        return response;
+      }
+    } catch (e) {
+      debugPrint(e.toString());
+      return [];
+    }
+  }
 }

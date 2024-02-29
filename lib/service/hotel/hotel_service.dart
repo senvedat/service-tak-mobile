@@ -82,7 +82,8 @@ class HotelService {
 
   Future qrGenerate(String url) async {
     try {
-      final apiUrl = Uri.parse('$kBaseUrl/api/qr-generate?data=https://servicetak.com/$url');
+      final apiUrl = Uri.parse(
+          '$kBaseUrl/api/qr-generate?data=https://servicetak.com/$url');
 
       final response = await http.get(
         apiUrl,
