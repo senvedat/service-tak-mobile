@@ -89,7 +89,7 @@ class CameraScreen extends StatelessWidget {
         image: viewModel.localImage.isEmpty
             ? null
             : DecorationImage(
-              fit: BoxFit.contain,
+                fit: BoxFit.contain,
                 image: Image.memory(base64Decode(viewModel.localImage),
                         gaplessPlayback: true)
                     .image),
