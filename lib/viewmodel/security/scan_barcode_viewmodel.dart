@@ -15,6 +15,7 @@ import 'package:service_tak_mobile/service/worker/worker_service.dart';
 import 'package:service_tak_mobile/utils/constants.dart';
 import 'package:service_tak_mobile/utils/local_storage_keys.dart';
 import 'package:service_tak_mobile/utils/navigation_helper.dart';
+import 'package:service_tak_mobile/view/widget/qr_not_found_dialog.dart';
 import 'package:service_tak_mobile/view/worker/open_screen.dart';
 import 'package:service_tak_mobile/view/worker/security/security_product_detail_screen.dart';
 import 'package:service_tak_mobile/view/worker/spa/spa_product_detail_screen.dart';
@@ -170,7 +171,6 @@ class ScanBarcodeViewModel extends ChangeNotifier {
           "#00000000", 'Cancel', true, ScanMode.QR);
       debugPrint("Scan barcode res: $barcodeScanRes");
       setSecondBarcode = barcodeScanRes == "-1" ? null : barcodeScanRes;
-      print("Second Barcode: $_secondBarcode");
       if (_secondBarcode != null && _secondBarcode!.isNotEmpty) {
         if (!context.mounted) return;
         await _getQrFromService(context);
@@ -186,36 +186,51 @@ class ScanBarcodeViewModel extends ChangeNotifier {
     var response = await _workerService.getQr(
         authToken, _secondBarcode ?? _barcode!.code!);
     if (response.statusCode == 200) {
-      _controller1?.pauseCamera();
-      debugPrint("QR Found");
-      String type = _worker?.hotel?.type ?? "";
-      String role = _worker?.role ?? "";
-      if (type == "bracelet") {
-        QrBracelet qrBracelet = QrBracelet.fromJson(jsonDecode(response.body));
-        if (role == "spa") {
-          if (!context.mounted) return true;
-          var result = await navigatorPush(
-              context, SpaProductDetailScreen(qrBracelet: qrBracelet));
-          if (result == "resume") {
-            _controller1?.resumeCamera();
-            notifyListeners();
+      if (jsonDecode(response.body)['status'] == "warning") {
+        if (!context.mounted) return false;
+        await showDialog(
+          context: context,
+          builder: (context) => QrNotFoundDialog(
+            onPressed: () {
+              Navigator.pop(context);
+              _controller1?.resumeCamera();
+            },
+          ),
+        );
+        return false;
+      } else {
+        _controller1?.pauseCamera();
+        debugPrint("QR Found");
+        String type = _worker?.hotel?.type ?? "";
+        String role = _worker?.role ?? "";
+        if (type == "bracelet") {
+          QrBracelet qrBracelet =
+              QrBracelet.fromJson(jsonDecode(response.body));
+          if (role == "spa") {
+            if (!context.mounted) return true;
+            var result = await navigatorPush(
+                context, SpaProductDetailScreen(qrBracelet: qrBracelet));
+            if (result == "resume") {
+              _controller1?.resumeCamera();
+              notifyListeners();
+            }
+          } else if (role == "security") {
+            if (!context.mounted) return true;
+            var result = await navigatorPush(
+                context, SecurityProductDetailScreen(qrBracelet: qrBracelet));
+            if (result == "resume") {
+              _controller1?.resumeCamera();
+              notifyListeners();
+            }
           }
-        } else if (role == "security") {
+        } else if (type == "card") {
+          QrCard qrCard = QrCard.fromJson(jsonDecode(response.body));
           if (!context.mounted) return true;
-          var result = await navigatorPush(
-              context, SecurityProductDetailScreen(qrBracelet: qrBracelet));
-          if (result == "resume") {
-            _controller1?.resumeCamera();
-            notifyListeners();
-          }
+          await navigatorPush(
+              context, OpenScreen(qrCard: qrCard, worker: _worker));
         }
-      } else if (type == "card") {
-        QrCard qrCard = QrCard.fromJson(jsonDecode(response.body));
-        if (!context.mounted) return true;
-        await navigatorPush(
-            context, OpenScreen(qrCard: qrCard, worker: _worker));
+        return true;
       }
-      return true;
     } else {
       return false;
     }
