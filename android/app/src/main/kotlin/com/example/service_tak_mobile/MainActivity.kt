@@ -1,4 +1,4 @@
-package com.example.service_tak_mobile
+package com.servicetak.servicetak
 
 import io.flutter.embedding.android.FlutterActivity
 
